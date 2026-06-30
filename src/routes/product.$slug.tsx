@@ -61,7 +61,7 @@ function ProductPage() {
           </div>
           {product.images.length > 1 && (
             <div className="grid grid-cols-5 gap-2">
-              {product.images.map((src, i) => (
+              {product.images.map((src: string, i: number) => (
                 <button
                   key={i}
                   onClick={() => setImgIdx(i)}
