@@ -122,11 +122,25 @@
 @utility gold-gradient { background-image: var(--gradient-gold); }
 @utility dark-gradient { background-image: var(--gradient-dark); }
 @utility shadow-luxury { box-shadow: var(--shadow-luxury); }
+@utility shadow-luxe { box-shadow: var(--shadow-luxury); }
 @utility shadow-gold { box-shadow: var(--shadow-gold); }
 @utility text-gold { color: var(--color-gold); }
+@utility text-gold-dark { color: var(--color-gold-dark); }
 @utility border-gold { border-color: var(--color-gold); }
 @utility bg-ink { background-color: var(--color-ink); }
 @utility text-ink { color: var(--color-ink); }
+@utility bg-cream { background-color: oklch(0.97 0.01 85); }
+@utility bg-charcoal { background-color: oklch(0.15 0.005 60); }
+@utility text-gradient-gold {
+  background-image: var(--gradient-gold);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+@utility hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  &:hover { transform: translateY(-2px); box-shadow: var(--shadow-gold); }
+}
 
 @utility container-lux {
   width: 100%;
@@ -151,3 +165,10 @@
   to { opacity: 1; transform: translateY(0); }
 }
 @utility fade-up { animation: fade-up 0.6s ease-out both; }
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@utility animate-fade-in { animation: fade-in 0.8s ease-out both; }
+
