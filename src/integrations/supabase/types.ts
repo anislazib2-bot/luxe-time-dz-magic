@@ -14,16 +14,353 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      categories: {
+        Row: {
+          created_at: string
+          id: string
+          name_ar: string
+          name_en: string
+          name_fr: string
+          slug: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name_ar: string
+          name_en: string
+          name_fr: string
+          slug: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name_ar?: string
+          name_en?: string
+          name_fr?: string
+          slug?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      order_items: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string | null
+          name_snapshot: string
+          order_id: string
+          price_snapshot: number
+          product_id: string | null
+          quantity: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          name_snapshot: string
+          order_id: string
+          price_snapshot: number
+          product_id?: string | null
+          quantity: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          name_snapshot?: string
+          order_id?: string
+          price_snapshot?: number
+          product_id?: string | null
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          address: string | null
+          commune: string
+          created_at: string
+          customer_user_id: string | null
+          delivery_dzd: number
+          delivery_type: Database["public"]["Enums"]["delivery_type"]
+          full_name: string
+          id: string
+          notes: string | null
+          order_number: string
+          phone: string
+          status: Database["public"]["Enums"]["order_status"]
+          subtotal_dzd: number
+          total_dzd: number
+          updated_at: string
+          wilaya_code: number
+        }
+        Insert: {
+          address?: string | null
+          commune: string
+          created_at?: string
+          customer_user_id?: string | null
+          delivery_dzd: number
+          delivery_type?: Database["public"]["Enums"]["delivery_type"]
+          full_name: string
+          id?: string
+          notes?: string | null
+          order_number: string
+          phone: string
+          status?: Database["public"]["Enums"]["order_status"]
+          subtotal_dzd: number
+          total_dzd: number
+          updated_at?: string
+          wilaya_code: number
+        }
+        Update: {
+          address?: string | null
+          commune?: string
+          created_at?: string
+          customer_user_id?: string | null
+          delivery_dzd?: number
+          delivery_type?: Database["public"]["Enums"]["delivery_type"]
+          full_name?: string
+          id?: string
+          notes?: string | null
+          order_number?: string
+          phone?: string
+          status?: Database["public"]["Enums"]["order_status"]
+          subtotal_dzd?: number
+          total_dzd?: number
+          updated_at?: string
+          wilaya_code?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_wilaya_code_fkey"
+            columns: ["wilaya_code"]
+            isOneToOne: false
+            referencedRelation: "wilayas"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          brand: string
+          category_id: string | null
+          created_at: string
+          description_ar: string | null
+          description_en: string | null
+          description_fr: string | null
+          discount_price_dzd: number | null
+          featured: boolean
+          gender: Database["public"]["Enums"]["product_gender"]
+          id: string
+          images: Json
+          is_active: boolean
+          is_limited: boolean
+          is_new: boolean
+          name_ar: string
+          name_en: string
+          name_fr: string
+          price_dzd: number
+          slug: string
+          specs: Json
+          stock: number
+          updated_at: string
+        }
+        Insert: {
+          brand: string
+          category_id?: string | null
+          created_at?: string
+          description_ar?: string | null
+          description_en?: string | null
+          description_fr?: string | null
+          discount_price_dzd?: number | null
+          featured?: boolean
+          gender?: Database["public"]["Enums"]["product_gender"]
+          id?: string
+          images?: Json
+          is_active?: boolean
+          is_limited?: boolean
+          is_new?: boolean
+          name_ar: string
+          name_en: string
+          name_fr: string
+          price_dzd: number
+          slug: string
+          specs?: Json
+          stock?: number
+          updated_at?: string
+        }
+        Update: {
+          brand?: string
+          category_id?: string | null
+          created_at?: string
+          description_ar?: string | null
+          description_en?: string | null
+          description_fr?: string | null
+          discount_price_dzd?: number | null
+          featured?: boolean
+          gender?: Database["public"]["Enums"]["product_gender"]
+          id?: string
+          images?: Json
+          is_active?: boolean
+          is_limited?: boolean
+          is_new?: boolean
+          name_ar?: string
+          name_en?: string
+          name_fr?: string
+          price_dzd?: number
+          slug?: string
+          specs?: Json
+          stock?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      wilayas: {
+        Row: {
+          code: number
+          delivery_home_dzd: number
+          delivery_office_dzd: number
+          name_ar: string
+          name_fr: string
+        }
+        Insert: {
+          code: number
+          delivery_home_dzd?: number
+          delivery_office_dzd?: number
+          name_ar: string
+          name_fr: string
+        }
+        Update: {
+          code?: number
+          delivery_home_dzd?: number
+          delivery_office_dzd?: number
+          name_ar?: string
+          name_fr?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      claim_first_admin: { Args: never; Returns: boolean }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      lookup_order: {
+        Args: { _order_number: string; _phone: string }
+        Returns: {
+          address: string
+          commune: string
+          created_at: string
+          delivery_dzd: number
+          delivery_type: Database["public"]["Enums"]["delivery_type"]
+          full_name: string
+          order_number: string
+          phone: string
+          status: Database["public"]["Enums"]["order_status"]
+          subtotal_dzd: number
+          total_dzd: number
+          wilaya_code: number
+        }[]
+      }
+      lookup_order_items: {
+        Args: { _order_number: string; _phone: string }
+        Returns: {
+          image_url: string
+          name_snapshot: string
+          price_snapshot: number
+          product_id: string
+          quantity: number
+        }[]
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "customer"
+      delivery_type: "home" | "office"
+      order_status:
+        | "pending"
+        | "confirmed"
+        | "preparing"
+        | "shipping"
+        | "delivered"
+        | "cancelled"
+      product_gender: "men" | "women" | "unisex"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +487,18 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "customer"],
+      delivery_type: ["home", "office"],
+      order_status: [
+        "pending",
+        "confirmed",
+        "preparing",
+        "shipping",
+        "delivered",
+        "cancelled",
+      ],
+      product_gender: ["men", "women", "unisex"],
+    },
   },
 } as const
