@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { listWilayas } from "@/lib/catalog.functions";
 import { placeOrder } from "@/lib/orders.functions";
 import { useCart } from "@/lib/cart-store";
-import { formatDZD, isValidDzPhone } from "@/lib/format";
+import { formatDZD, isValidDZPhone } from "@/lib/format";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -107,7 +107,7 @@ function CheckoutPage() {
   function validate(): boolean {
     const e: Record<string, string> = {};
     if (form.full_name.trim().length < 2) e.full_name = "الاسم مطلوب";
-    if (!isValidDzPhone(form.phone)) e.phone = "رقم الهاتف غير صحيح (مثال: 0555123456)";
+    if (!isValidDZPhone(form.phone)) e.phone = "رقم الهاتف غير صحيح (مثال: 0555123456)";
     if (!form.wilaya_code) e.wilaya_code = "اختر الولاية";
     if (form.commune.trim().length < 2) e.commune = "البلدية مطلوبة";
     if (form.delivery_type === "home" && form.address.trim().length < 5) e.address = "العنوان مطلوب للتوصيل للمنزل";
