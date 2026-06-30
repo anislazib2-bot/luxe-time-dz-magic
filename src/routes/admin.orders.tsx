@@ -71,7 +71,7 @@ function OrderDialog({ id, onClose }: { id: string; onClose: () => void }) {
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-2xl">
         <DialogHeader><DialogTitle>تفاصيل الطلب {data?.order?.order_number}</DialogTitle></DialogHeader>
-        {data && (
+        {data && data.order && (
           <div className="space-y-3 text-sm">
             <div className="grid grid-cols-2 gap-2">
               <div><p className="text-muted-foreground">العميل</p><p>{data.order.full_name}</p></div>
