@@ -1,8 +1,10 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ShoppingBag, Search, User, Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useCart } from "@/lib/cart-store";
 import { supabase } from "@/integrations/supabase/client";
+import { getStoreSettings } from "@/lib/settings.functions";
 import { Button } from "@/components/ui/button";
 
 const NAV = [
