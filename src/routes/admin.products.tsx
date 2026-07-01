@@ -158,7 +158,35 @@ function ProductsPage() {
                 <div><Label>المخزون</Label><Input type="number" required min={0} value={form.stock} onChange={(e) => setForm({ ...form, stock: Number(e.target.value) })} /></div>
               </div>
               <div><Label>الوصف</Label><Textarea rows={3} value={form.description_ar} onChange={(e) => setForm({ ...form, description_ar: e.target.value })} /></div>
-              <div><Label>الصور (رابط في كل سطر)</Label><Textarea rows={3} required value={form.images} onChange={(e) => setForm({ ...form, images: e.target.value })} /></div>
+              <div className="space-y-2">
+                <Label>الصور</Label>
+                <div className="flex flex-wrap gap-2">
+                  {form.images.split("\n").map((s) => s.trim()).filter(Boolean).map((url, i) => (
+                    <div key={i} className="relative h-20 w-20 overflow-hidden rounded border border-border">
+                      <img src={url} alt="" className="h-full w-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const arr = form.images.split("\n").map((s) => s.trim()).filter(Boolean);
+                          arr.splice(i, 1);
+                          setForm({ ...form, images: arr.join("\n") });
+                        }}
+                        className="absolute end-1 top-1 rounded-full bg-black/70 p-0.5 text-white"
+                        aria-label="حذف"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                  <label className="flex h-20 w-20 cursor-pointer flex-col items-center justify-center gap-1 rounded border-2 border-dashed border-border text-xs text-muted-foreground hover:border-gold hover:text-gold">
+                    <Upload className="h-4 w-4" />
+                    {uploading ? "..." : "رفع"}
+                    <input type="file" accept="image/*" multiple className="hidden" disabled={uploading}
+                      onChange={(e) => { handleUpload(e.target.files); e.target.value = ""; }} />
+                  </label>
+                </div>
+                <Textarea rows={2} placeholder="أو ألصق روابط الصور (رابط في كل سطر)" value={form.images} onChange={(e) => setForm({ ...form, images: e.target.value })} />
+              </div>
               <div className="flex flex-wrap gap-4 text-sm">
                 <label className="flex items-center gap-2"><Checkbox checked={form.featured} onCheckedChange={(v) => setForm({ ...form, featured: !!v })} /> مميّز</label>
                 <label className="flex items-center gap-2"><Checkbox checked={form.is_new} onCheckedChange={(v) => setForm({ ...form, is_new: !!v })} /> جديد</label>
