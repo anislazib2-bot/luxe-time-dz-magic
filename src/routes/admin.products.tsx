@@ -31,11 +31,44 @@ const empty: FormState = {
   stock: 0, images: "", featured: false, is_new: false, is_limited: false, is_active: true,
 };
 
+function fileToDataUrl(f: File): Promise<string> {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result as string);
+    r.onerror = rej;
+    r.readAsDataURL(f);
+  });
+}
+
 function ProductsPage() {
   const qc = useQueryClient();
   const products = useQuery({ queryKey: ["admin-products"], queryFn: () => adminListProducts() });
   const cats = useQuery({ queryKey: ["categories"], queryFn: () => listCategories() });
   const [form, setForm] = useState<FormState | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  async function handleUpload(files: FileList | null) {
+    if (!files || !form) return;
+    setUploading(true);
+    try {
+      const urls: string[] = [];
+      for (const file of Array.from(files)) {
+        if (file.size > 5 * 1024 * 1024) { toast.error(`${file.name}: أكبر من 5MB`); continue; }
+        const dataUrl = await fileToDataUrl(file);
+        const res: any = await adminUploadImage({ data: { filename: file.name, dataUrl, folder: "products" } as any } as any);
+        urls.push(res.url);
+      }
+      if (urls.length) {
+        const existing = form.images ? form.images.split("\n").map((s) => s.trim()).filter(Boolean) : [];
+        setForm({ ...form, images: [...existing, ...urls].join("\n") });
+        toast.success(`تم رفع ${urls.length} صورة`);
+      }
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setUploading(false);
+    }
+  }
 
   const save = useMutation({
     mutationFn: async (f: FormState) => {
