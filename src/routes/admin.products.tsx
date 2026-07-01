@@ -73,7 +73,9 @@ function ProductsPage() {
   const save = useMutation({
     mutationFn: async (f: FormState) => {
       const payload = {
-        slug: f.slug, name_ar: f.name_ar, name_fr: f.name_fr, name_en: f.name_en,
+        slug: f.slug, name_ar: f.name_ar,
+        name_fr: f.name_fr?.trim() || f.name_ar,
+        name_en: f.name_en?.trim() || f.name_ar,
         description_ar: f.description_ar || null, description_fr: null, description_en: null,
         brand: f.brand, gender: f.gender, category_id: f.category_id,
         price_dzd: f.price_dzd, discount_price_dzd: f.discount_price_dzd, stock: f.stock,
@@ -83,7 +85,12 @@ function ProductsPage() {
       if (f.id) return adminUpdateProduct({ data: { id: f.id, ...payload } as any } as any);
       return adminCreateProduct({ data: payload as any } as any);
     },
-    onSuccess: () => { toast.success("تم الحفظ"); qc.invalidateQueries({ queryKey: ["admin-products"] }); setForm(null); },
+    onSuccess: () => {
+      toast.success("تم الحفظ"); qc.invalidateQueries({ queryKey: ["admin-products"] });
+      qc.invalidateQueries({ queryKey: ["products"] });
+      qc.invalidateQueries({ queryKey: ["home-data"] });
+      setForm(null);
+    },
     onError: (e: Error) => toast.error(e.message),
   });
   const del = useMutation({
