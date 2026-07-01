@@ -129,7 +129,14 @@ function ProductsPage() {
         <Dialog open onOpenChange={(o) => !o && setForm(null)}>
           <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
             <DialogHeader><DialogTitle>{form.id ? "تعديل المنتج" : "إضافة منتج"}</DialogTitle></DialogHeader>
-            <form onSubmit={(e) => { e.preventDefault(); save.mutate(form); }} className="space-y-3">
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const imgs = form.images.split("\n").map((s) => s.trim()).filter(Boolean);
+              if (imgs.length === 0) { toast.error("أضف صورة واحدة على الأقل"); return; }
+              if (!form.name_fr.trim()) setForm({ ...form, name_fr: form.name_ar });
+              if (!form.name_en.trim()) setForm({ ...form, name_en: form.name_ar });
+              save.mutate(form);
+            }} className="space-y-3">
               <div className="grid gap-3 md:grid-cols-2">
                 <div><Label>الاسم (عربي)</Label><Input required value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
                 <div><Label>Slug</Label><Input required pattern="[a-z0-9-]+" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} /></div>
