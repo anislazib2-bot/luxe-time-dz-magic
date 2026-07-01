@@ -146,9 +146,9 @@ function ProductsPage() {
             }} className="space-y-3">
               <div className="grid gap-3 md:grid-cols-2">
                 <div><Label>الاسم (عربي)</Label><Input required value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
-                <div><Label>Slug</Label><Input required pattern="[a-z0-9-]+" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} /></div>
-                <div><Label>الاسم (فرنسي)</Label><Input required value={form.name_fr} onChange={(e) => setForm({ ...form, name_fr: e.target.value })} /></div>
-                <div><Label>الاسم (إنجليزي)</Label><Input required value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
+                <div><Label>Slug (بالإنجليزية، حروف وأرقام و -)</Label><Input required pattern="[a-z0-9-]+" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") })} /></div>
+                <div><Label>الاسم (فرنسي)</Label><Input value={form.name_fr} onChange={(e) => setForm({ ...form, name_fr: e.target.value })} placeholder="اختياري" /></div>
+                <div><Label>الاسم (إنجليزي)</Label><Input value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} placeholder="اختياري" /></div>
                 <div><Label>الماركة</Label><Input required value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} /></div>
                 <div>
                   <Label>النوع</Label>
