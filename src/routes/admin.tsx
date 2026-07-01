@@ -37,6 +37,7 @@ function AdminLayout() {
         <Link to="/admin/orders" className="rounded-md px-3 py-1.5 hover:bg-secondary" activeProps={{ className: "bg-ink text-primary-foreground" }}>الطلبات</Link>
         <Link to="/admin/products" className="rounded-md px-3 py-1.5 hover:bg-secondary" activeProps={{ className: "bg-ink text-primary-foreground" }}>المنتجات</Link>
         <Link to="/admin/delivery" className="rounded-md px-3 py-1.5 hover:bg-secondary" activeProps={{ className: "bg-ink text-primary-foreground" }}>التوصيل</Link>
+        <Link to="/admin/settings" className="rounded-md px-3 py-1.5 hover:bg-secondary" activeProps={{ className: "bg-ink text-primary-foreground" }}>الإعدادات</Link>
       </nav>
       <Outlet />
     </div>

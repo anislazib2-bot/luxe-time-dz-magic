@@ -1,8 +1,10 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ShoppingBag, Search, User, Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useCart } from "@/lib/cart-store";
 import { supabase } from "@/integrations/supabase/client";
+import { getStoreSettings } from "@/lib/settings.functions";
 import { Button } from "@/components/ui/button";
 
 const NAV = [
@@ -19,6 +21,8 @@ export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const navigate = useNavigate();
+  const settings = useQuery({ queryKey: ["store-settings"], queryFn: () => getStoreSettings(), staleTime: 60_000 });
+  const s = settings.data;
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserEmail(data.user?.email ?? null));
@@ -31,8 +35,8 @@ export function Header() {
       {/* Top bar */}
       <div className="bg-ink text-primary-foreground">
         <div className="container-lux flex h-9 items-center justify-between text-xs">
-          <span>توصيل لجميع ولايات الجزائر • الدفع عند الاستلام</span>
-          <span className="hidden md:inline">خدمة العملاء: 0555 00 00 00</span>
+          <span className="truncate">{s?.topbar_text || "توصيل لجميع ولايات الجزائر • الدفع عند الاستلام"}</span>
+          {s?.phone && <span className="hidden md:inline">خدمة العملاء: {s.phone}</span>}
         </div>
       </div>
       <div className="container-lux flex h-16 items-center justify-between gap-4 md:h-20">
@@ -41,9 +45,13 @@ export function Header() {
         </button>
 
         <Link to="/" className="flex items-center gap-2">
-          <span className="font-display text-xl font-black tracking-tight md:text-2xl">
-            LUXE<span className="text-gold">·</span>TIME
-          </span>
+          {s?.logo_url ? (
+            <img src={s.logo_url} alt={s.store_name || "LUXE TIME"} className="h-8 md:h-10 w-auto object-contain" />
+          ) : (
+            <span className="font-display text-xl font-black tracking-tight md:text-2xl">
+              LUXE<span className="text-gold">·</span>TIME
+            </span>
+          )}
           <span className="hidden text-[10px] font-semibold tracking-[0.3em] text-muted-foreground md:inline">DZ</span>
         </Link>
 

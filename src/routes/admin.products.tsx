@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminListProducts, adminCreateProduct, adminUpdateProduct, adminDeleteProduct } from "@/lib/admin.functions";
+import { adminUploadImage } from "@/lib/settings.functions";
 import { listCategories } from "@/lib/catalog.functions";
 import { formatDZD } from "@/lib/format";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { Pencil, Trash2, Plus, Upload, X } from "lucide-react";
 
 export const Route = createFileRoute("/admin/products")({ component: ProductsPage });
 
@@ -30,16 +31,51 @@ const empty: FormState = {
   stock: 0, images: "", featured: false, is_new: false, is_limited: false, is_active: true,
 };
 
+function fileToDataUrl(f: File): Promise<string> {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result as string);
+    r.onerror = rej;
+    r.readAsDataURL(f);
+  });
+}
+
 function ProductsPage() {
   const qc = useQueryClient();
   const products = useQuery({ queryKey: ["admin-products"], queryFn: () => adminListProducts() });
   const cats = useQuery({ queryKey: ["categories"], queryFn: () => listCategories() });
   const [form, setForm] = useState<FormState | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  async function handleUpload(files: FileList | null) {
+    if (!files || !form) return;
+    setUploading(true);
+    try {
+      const urls: string[] = [];
+      for (const file of Array.from(files)) {
+        if (file.size > 5 * 1024 * 1024) { toast.error(`${file.name}: أكبر من 5MB`); continue; }
+        const dataUrl = await fileToDataUrl(file);
+        const res: any = await adminUploadImage({ data: { filename: file.name, dataUrl, folder: "products" } as any } as any);
+        urls.push(res.url);
+      }
+      if (urls.length) {
+        const existing = form.images ? form.images.split("\n").map((s) => s.trim()).filter(Boolean) : [];
+        setForm({ ...form, images: [...existing, ...urls].join("\n") });
+        toast.success(`تم رفع ${urls.length} صورة`);
+      }
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setUploading(false);
+    }
+  }
 
   const save = useMutation({
     mutationFn: async (f: FormState) => {
       const payload = {
-        slug: f.slug, name_ar: f.name_ar, name_fr: f.name_fr, name_en: f.name_en,
+        slug: f.slug, name_ar: f.name_ar,
+        name_fr: f.name_fr?.trim() || f.name_ar,
+        name_en: f.name_en?.trim() || f.name_ar,
         description_ar: f.description_ar || null, description_fr: null, description_en: null,
         brand: f.brand, gender: f.gender, category_id: f.category_id,
         price_dzd: f.price_dzd, discount_price_dzd: f.discount_price_dzd, stock: f.stock,
@@ -49,7 +85,12 @@ function ProductsPage() {
       if (f.id) return adminUpdateProduct({ data: { id: f.id, ...payload } as any } as any);
       return adminCreateProduct({ data: payload as any } as any);
     },
-    onSuccess: () => { toast.success("تم الحفظ"); qc.invalidateQueries({ queryKey: ["admin-products"] }); setForm(null); },
+    onSuccess: () => {
+      toast.success("تم الحفظ"); qc.invalidateQueries({ queryKey: ["admin-products"] });
+      qc.invalidateQueries({ queryKey: ["products"] });
+      qc.invalidateQueries({ queryKey: ["home-data"] });
+      setForm(null);
+    },
     onError: (e: Error) => toast.error(e.message),
   });
   const del = useMutation({
@@ -95,12 +136,19 @@ function ProductsPage() {
         <Dialog open onOpenChange={(o) => !o && setForm(null)}>
           <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
             <DialogHeader><DialogTitle>{form.id ? "تعديل المنتج" : "إضافة منتج"}</DialogTitle></DialogHeader>
-            <form onSubmit={(e) => { e.preventDefault(); save.mutate(form); }} className="space-y-3">
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const imgs = form.images.split("\n").map((s) => s.trim()).filter(Boolean);
+              if (imgs.length === 0) { toast.error("أضف صورة واحدة على الأقل"); return; }
+              if (!form.name_fr.trim()) setForm({ ...form, name_fr: form.name_ar });
+              if (!form.name_en.trim()) setForm({ ...form, name_en: form.name_ar });
+              save.mutate(form);
+            }} className="space-y-3">
               <div className="grid gap-3 md:grid-cols-2">
                 <div><Label>الاسم (عربي)</Label><Input required value={form.name_ar} onChange={(e) => setForm({ ...form, name_ar: e.target.value })} /></div>
-                <div><Label>Slug</Label><Input required pattern="[a-z0-9-]+" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} /></div>
-                <div><Label>الاسم (فرنسي)</Label><Input required value={form.name_fr} onChange={(e) => setForm({ ...form, name_fr: e.target.value })} /></div>
-                <div><Label>الاسم (إنجليزي)</Label><Input required value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} /></div>
+                <div><Label>Slug (بالإنجليزية، حروف وأرقام و -)</Label><Input required pattern="[a-z0-9-]+" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") })} /></div>
+                <div><Label>الاسم (فرنسي)</Label><Input value={form.name_fr} onChange={(e) => setForm({ ...form, name_fr: e.target.value })} placeholder="اختياري" /></div>
+                <div><Label>الاسم (إنجليزي)</Label><Input value={form.name_en} onChange={(e) => setForm({ ...form, name_en: e.target.value })} placeholder="اختياري" /></div>
                 <div><Label>الماركة</Label><Input required value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} /></div>
                 <div>
                   <Label>النوع</Label>
@@ -124,7 +172,35 @@ function ProductsPage() {
                 <div><Label>المخزون</Label><Input type="number" required min={0} value={form.stock} onChange={(e) => setForm({ ...form, stock: Number(e.target.value) })} /></div>
               </div>
               <div><Label>الوصف</Label><Textarea rows={3} value={form.description_ar} onChange={(e) => setForm({ ...form, description_ar: e.target.value })} /></div>
-              <div><Label>الصور (رابط في كل سطر)</Label><Textarea rows={3} required value={form.images} onChange={(e) => setForm({ ...form, images: e.target.value })} /></div>
+              <div className="space-y-2">
+                <Label>الصور</Label>
+                <div className="flex flex-wrap gap-2">
+                  {form.images.split("\n").map((s) => s.trim()).filter(Boolean).map((url, i) => (
+                    <div key={i} className="relative h-20 w-20 overflow-hidden rounded border border-border">
+                      <img src={url} alt="" className="h-full w-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const arr = form.images.split("\n").map((s) => s.trim()).filter(Boolean);
+                          arr.splice(i, 1);
+                          setForm({ ...form, images: arr.join("\n") });
+                        }}
+                        className="absolute end-1 top-1 rounded-full bg-black/70 p-0.5 text-white"
+                        aria-label="حذف"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                  <label className="flex h-20 w-20 cursor-pointer flex-col items-center justify-center gap-1 rounded border-2 border-dashed border-border text-xs text-muted-foreground hover:border-gold hover:text-gold">
+                    <Upload className="h-4 w-4" />
+                    {uploading ? "..." : "رفع"}
+                    <input type="file" accept="image/*" multiple className="hidden" disabled={uploading}
+                      onChange={(e) => { handleUpload(e.target.files); e.target.value = ""; }} />
+                  </label>
+                </div>
+                <Textarea rows={2} placeholder="أو ألصق روابط الصور (رابط في كل سطر)" value={form.images} onChange={(e) => setForm({ ...form, images: e.target.value })} />
+              </div>
               <div className="flex flex-wrap gap-4 text-sm">
                 <label className="flex items-center gap-2"><Checkbox checked={form.featured} onCheckedChange={(v) => setForm({ ...form, featured: !!v })} /> مميّز</label>
                 <label className="flex items-center gap-2"><Checkbox checked={form.is_new} onCheckedChange={(v) => setForm({ ...form, is_new: !!v })} /> جديد</label>
