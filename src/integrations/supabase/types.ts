@@ -264,6 +264,51 @@ export type Database = {
         }
         Relationships: []
       }
+      store_settings: {
+        Row: {
+          address: string | null
+          email: string | null
+          facebook_url: string | null
+          free_shipping_threshold_dzd: number | null
+          id: number
+          instagram_url: string | null
+          logo_url: string | null
+          phone: string | null
+          store_name: string
+          topbar_text: string | null
+          updated_at: string
+          whatsapp: string | null
+        }
+        Insert: {
+          address?: string | null
+          email?: string | null
+          facebook_url?: string | null
+          free_shipping_threshold_dzd?: number | null
+          id?: number
+          instagram_url?: string | null
+          logo_url?: string | null
+          phone?: string | null
+          store_name?: string
+          topbar_text?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Update: {
+          address?: string | null
+          email?: string | null
+          facebook_url?: string | null
+          free_shipping_threshold_dzd?: number | null
+          id?: number
+          instagram_url?: string | null
+          logo_url?: string | null
+          phone?: string | null
+          store_name?: string
+          topbar_text?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
