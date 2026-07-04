@@ -118,7 +118,12 @@ function Hero() {
           <div className="absolute -inset-10 rounded-full bg-gold/20 blur-3xl" />
           <img
             src="/__l5e/assets-v1/e07276f5/IMG_20260630_225837_024.jpg"
-            alt="ساعة فاخرة"
+            alt="ساعة فاخرة أصلية من مجموعة LUXE TIME DZ"
+            width={480}
+            height={480}
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
             className="relative mx-auto h-[480px] w-[480px] rounded-full object-cover shadow-luxe ring-1 ring-gold/30"
             onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
           />
