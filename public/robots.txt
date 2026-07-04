@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /account
+Disallow: /checkout
+Disallow: /auth
+Disallow: /api/
+
+Sitemap: https://luxe-time-dz-magic.lovable.app/sitemap.xml

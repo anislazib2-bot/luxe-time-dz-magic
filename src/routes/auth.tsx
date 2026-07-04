@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/auth")({
-  head: () => ({ meta: [{ title: "تسجيل الدخول — LUXE TIME DZ" }] }),
+  head: () => ({ meta: [{ title: "تسجيل الدخول — LUXE TIME DZ" }, { name: "robots", content: "noindex, nofollow" }] }),
   component: AuthPage,
 });
 

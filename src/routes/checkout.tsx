@@ -16,7 +16,11 @@ import { toast } from "sonner";
 import { CheckCircle2, ShoppingBag } from "lucide-react";
 
 export const Route = createFileRoute("/checkout")({
-  head: () => ({ meta: [{ title: "إتمام الطلب — LUXE TIME DZ" }] }),
+  head: () => ({ meta: [
+    { title: "إتمام الطلب — LUXE TIME DZ" },
+    { name: "description", content: "أكمل طلبك بأمان مع الدفع عند الاستلام والتوصيل لجميع ولايات الجزائر." },
+    { name: "robots", content: "noindex, nofollow" },
+  ] }),
   loader: async ({ context }) => {
     await context.queryClient.prefetchQuery({ queryKey: ["wilayas"], queryFn: () => listWilayas() });
   },
