@@ -7,7 +7,7 @@ import { checkAdmin, claimFirstAdmin } from "@/lib/admin.functions";
 import { useQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/account")({
-  head: () => ({ meta: [{ title: "حسابي — LUXE TIME DZ" }] }),
+  head: () => ({ meta: [{ title: "حسابي — LUXE TIME DZ" }, { name: "robots", content: "noindex, nofollow" }] }),
   component: AccountPage,
 });
 

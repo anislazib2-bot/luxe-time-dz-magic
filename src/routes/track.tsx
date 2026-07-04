@@ -10,7 +10,7 @@ import { formatDZD } from "@/lib/format";
 import { Package, Search } from "lucide-react";
 
 export const Route = createFileRoute("/track")({
-  head: () => ({ meta: [{ title: "تتبع الطلب — LUXE TIME DZ" }] }),
+  head: () => ({ meta: [{ title: "تتبع الطلب — LUXE TIME DZ" }, { name: "description", content: "تتبع حالة طلبك من LUXE TIME DZ بإدخال رقم الطلب." }], links: [{ rel: "canonical", href: "https://luxe-time-dz-magic.lovable.app/track" }] }),
   component: TrackPage,
 });
 

@@ -5,7 +5,7 @@ import { checkAdmin } from "@/lib/admin.functions";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "لوحة التحكم — LUXE TIME DZ" }] }),
+  head: () => ({ meta: [{ title: "لوحة التحكم — LUXE TIME DZ" }, { name: "robots", content: "noindex, nofollow" }] }),
   component: AdminLayout,
 });
 
