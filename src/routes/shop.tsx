@@ -23,7 +23,19 @@ const SearchSchema = z.object({
 });
 
 export const Route = createFileRoute("/shop")({
-  head: () => ({ meta: [{ title: "المتجر — LUXE TIME DZ" }] }),
+  head: () => ({
+    meta: [
+      { title: "المتجر — ساعات فاخرة أصلية | LUXE TIME DZ" },
+      { name: "description", content: "تصفح مجموعتنا الكاملة من الساعات الفاخرة الأصلية للرجال والنساء في الجزائر. أسعار تنافسية، ضمان رسمي، وتوصيل لكل الولايات." },
+      { property: "og:title", content: "المتجر — ساعات فاخرة أصلية | LUXE TIME DZ" },
+      { property: "og:description", content: "مجموعة كاملة من الساعات الفاخرة الأصلية في الجزائر." },
+      { property: "og:url", content: "https://luxe-time-dz-magic.lovable.app/shop" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:title", content: "المتجر — LUXE TIME DZ" },
+      { name: "twitter:description", content: "مجموعة كاملة من الساعات الفاخرة الأصلية في الجزائر." },
+    ],
+    links: [{ rel: "canonical", href: "https://luxe-time-dz-magic.lovable.app/shop" }],
+  }),
   validateSearch: SearchSchema,
   component: ShopPage,
 });
