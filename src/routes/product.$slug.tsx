@@ -107,7 +107,7 @@ function ProductPage() {
             className="relative aspect-square overflow-hidden rounded-lg bg-secondary cursor-zoom-in"
             onClick={() => setZoom(true)}
           >
-            <img src={product.images[imgIdx]} alt={product.name_ar} className="h-full w-full object-cover" />
+            <img src={product.images[imgIdx]} alt={`${product.brand} ${product.name_ar} — صورة ${imgIdx + 1}`} loading="eager" fetchPriority="high" decoding="async" className="h-full w-full object-cover" />
             {off > 0 && <Badge className="absolute top-3 start-3" variant="destructive">-{off}%</Badge>}
           </div>
           {product.images.length > 1 && (
@@ -117,8 +117,9 @@ function ProductPage() {
                   key={i}
                   onClick={() => setImgIdx(i)}
                   className={`overflow-hidden rounded border-2 transition ${i === imgIdx ? "border-gold" : "border-transparent"}`}
+                  aria-label={`عرض الصورة ${i + 1}`}
                 >
-                  <img src={src} alt="" className="aspect-square w-full object-cover" />
+                  <img src={src} alt={`${product.brand} ${product.name_ar} مصغرة ${i + 1}`} loading="lazy" decoding="async" className="aspect-square w-full object-cover" />
                 </button>
               ))}
             </div>
