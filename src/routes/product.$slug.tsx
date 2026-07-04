@@ -19,13 +19,64 @@ export const Route = createFileRoute("/product/$slug")({
     if (!product) throw notFound();
     return { product };
   },
-  head: ({ loaderData }) => ({
-    meta: loaderData?.product ? [
-      { title: `${loaderData.product.name_ar} — LUXE TIME DZ` },
-      { name: "description", content: loaderData.product.description_ar ?? loaderData.product.name_ar },
-      { property: "og:image", content: loaderData.product.images[0] },
-    ] : [],
-  }),
+  head: ({ params, loaderData }) => {
+    const SITE = "https://luxe-time-dz-magic.lovable.app";
+    const url = `${SITE}/product/${params.slug}`;
+    if (!loaderData?.product) {
+      return {
+        meta: [{ title: "منتج غير متوفر — LUXE TIME DZ" }, { name: "robots", content: "noindex" }],
+        links: [{ rel: "canonical", href: url }],
+      };
+    }
+    const p = loaderData.product;
+    const price = p.discount_price_dzd ?? p.price_dzd;
+    const img = p.images[0];
+    const title = `${p.name_ar} — ${p.brand} | LUXE TIME DZ`;
+    const desc = (p.description_ar ?? `اشترِ ${p.name_ar} من ${p.brand} — ساعة أصلية بضمان في الجزائر. توصيل لكل الولايات.`).slice(0, 158);
+    return {
+      meta: [
+        { title },
+        { name: "description", content: desc },
+        { property: "og:title", content: title },
+        { property: "og:description", content: desc },
+        { property: "og:type", content: "product" },
+        { property: "og:url", content: url },
+        ...(img ? [
+          { property: "og:image", content: img },
+          { property: "og:image:alt", content: `${p.brand} ${p.name_ar}` },
+          { name: "twitter:image", content: img },
+        ] : []),
+        { property: "product:price:amount", content: String(price) },
+        { property: "product:price:currency", content: "DZD" },
+        { property: "product:availability", content: p.stock > 0 ? "in stock" : "out of stock" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: desc },
+      ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            name: p.name_ar,
+            description: p.description_ar ?? p.name_ar,
+            image: p.images,
+            sku: p.id,
+            brand: { "@type": "Brand", name: p.brand },
+            offers: {
+              "@type": "Offer",
+              url,
+              priceCurrency: "DZD",
+              price: String(price),
+              availability: p.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+              itemCondition: "https://schema.org/NewCondition",
+            },
+          }),
+        },
+      ],
+    };
+  },
   component: ProductPage,
 });
 
