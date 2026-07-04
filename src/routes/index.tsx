@@ -9,11 +9,55 @@ import { Input } from "@/components/ui/input";
 import type { ProductRow } from "@/lib/types";
 import { toast } from "sonner";
 
+const HERO_IMG = "https://luxe-time-dz-magic.lovable.app/__l5e/assets-v1/e07276f5/IMG_20260630_225837_024.jpg";
+const SITE_URL = "https://luxe-time-dz-magic.lovable.app";
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "LUXE TIME DZ — متجر الساعات الفاخرة في الجزائر" },
-      { name: "description", content: "تسوق أرقى الساعات الفاخرة الأصلية من Festina وغيرها. توصيل سريع لكافة ولايات الجزائر مع الدفع عند الاستلام." },
+      { title: "ساعات فاخرة في الجزائر | LUXE TIME DZ" },
+      { name: "description", content: "متجر الساعات الفاخرة الأصلية في الجزائر — Festina وأرقى الماركات العالمية. توصيل لكل الولايات والدفع عند الاستلام." },
+      { name: "keywords", content: "ساعات فاخرة الجزائر, montres de luxe Algérie, luxury watches Algeria, Festina, ساعات رجالية, ساعات نسائية" },
+      { property: "og:title", content: "ساعات فاخرة في الجزائر | LUXE TIME DZ" },
+      { property: "og:description", content: "متجر الساعات الفاخرة الأصلية في الجزائر. توصيل لكل الولايات والدفع عند الاستلام." },
+      { property: "og:url", content: SITE_URL + "/" },
+      { property: "og:image", content: HERO_IMG },
+      { property: "og:image:alt", content: "ساعة فاخرة من LUXE TIME DZ" },
+      { name: "twitter:title", content: "ساعات فاخرة في الجزائر | LUXE TIME DZ" },
+      { name: "twitter:description", content: "متجر الساعات الفاخرة الأصلية في الجزائر. توصيل لكل الولايات والدفع عند الاستلام." },
+      { name: "twitter:image", content: HERO_IMG },
+    ],
+    links: [{ rel: "canonical", href: SITE_URL + "/" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Store",
+          name: "LUXE TIME DZ",
+          image: HERO_IMG,
+          url: SITE_URL,
+          description: "متجر الساعات الفاخرة الأصلية في الجزائر.",
+          address: { "@type": "PostalAddress", addressCountry: "DZ" },
+          areaServed: "DZ",
+          priceRange: "$$-$$$$",
+          paymentAccepted: "Cash on Delivery",
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: [
+            { "@type": "Question", name: "هل الساعات أصلية؟", acceptedAnswer: { "@type": "Answer", text: "نعم، جميع الساعات أصلية 100% ومستوردة مباشرة من الموزعين الرسميين، ومرفقة بشهادة الأصالة والضمان." } },
+            { "@type": "Question", name: "كم تستغرق مدة التوصيل؟", acceptedAnswer: { "@type": "Answer", text: "من 2 إلى 5 أيام عمل حسب الولاية. التوصيل متاح لجميع ولايات الجزائر الـ58." } },
+            { "@type": "Question", name: "هل يمكنني الدفع عند الاستلام؟", acceptedAnswer: { "@type": "Answer", text: "نعم، الدفع عند الاستلام (COD) متاح في جميع الولايات بدون أي رسوم إضافية." } },
+            { "@type": "Question", name: "ما هي سياسة الإرجاع؟", acceptedAnswer: { "@type": "Answer", text: "يمكنك إرجاع المنتج خلال 7 أيام من الاستلام في حال وجود عيب مصنعي أو عدم مطابقة الوصف." } },
+            { "@type": "Question", name: "هل يوجد ضمان؟", acceptedAnswer: { "@type": "Answer", text: "نعم، جميع المنتجات تأتي بضمان رسمي لمدة سنتين على حركة الساعة." } },
+          ],
+        }),
+      },
     ],
   }),
   loader: async ({ context }) => {
