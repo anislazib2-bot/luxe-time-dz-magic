@@ -16,8 +16,9 @@ export function ProductCard({ p }: { p: ProductRow }) {
         {img ? (
           <img
             src={img}
-            alt={p.name_ar}
+            alt={`${p.brand} ${p.name_ar}`}
             loading="lazy"
+            decoding="async"
             className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
           />
         ) : (
