@@ -30,7 +30,9 @@ const PlaceOrderSchema = z.object({
 export const placeOrder = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => PlaceOrderSchema.parse(input))
   .handler(async ({ data }) => {
-    const supabase = pubClient();
+    // Use admin client server-side: prices/stock are re-validated below,
+    // and the insert needs RETURNING which anon can't SELECT under RLS.
+    const { supabaseAdmin: supabase } = await import("@/integrations/supabase/client.server");
 
     // Re-fetch products server-side to get authoritative prices + stock
     const productIds = data.items.map((i) => i.product_id);
