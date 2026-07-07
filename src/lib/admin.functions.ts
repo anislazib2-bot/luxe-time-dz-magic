@@ -167,8 +167,8 @@ export const adminUpdateWilaya = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z.object({
       code: z.number().int().min(1).max(58),
-      delivery_home_dzd: z.number().int().min(0),
-      delivery_office_dzd: z.number().int().min(0),
+      delivery_home_dzd: z.number().int().min(0).max(100000),
+      delivery_office_dzd: z.number().int().min(0).max(100000),
     }).parse(input)
   )
   .handler(async ({ context, data }) => {
@@ -177,6 +177,64 @@ export const adminUpdateWilaya = createServerFn({ method: "POST" })
       .from("wilayas")
       .update({ delivery_home_dzd: data.delivery_home_dzd, delivery_office_dzd: data.delivery_office_dzd })
       .eq("code", data.code);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const adminListCommuneRates = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ wilaya_code: z.number().int().min(1).max(58).optional() }).parse(input ?? {})
+  )
+  .handler(async ({ context, data }) => {
+    await assertAdmin({ supabase: context.supabase, userId: context.userId });
+    let q = context.supabase.from("commune_delivery_rates").select("*").order("wilaya_code").order("commune");
+    if (data.wilaya_code) q = q.eq("wilaya_code", data.wilaya_code);
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
+const CommuneRateSchema = z.object({
+  wilaya_code: z.number().int().min(1).max(58),
+  commune: z.string().trim().min(2, "اسم البلدية قصير جدا").max(80, "اسم البلدية طويل جدا"),
+  delivery_home_dzd: z.number().int().min(0, "لا يمكن أن يكون سالبا").max(100000, "قيمة كبيرة جدا"),
+  delivery_office_dzd: z.number().int().min(0, "لا يمكن أن يكون سالبا").max(100000, "قيمة كبيرة جدا"),
+});
+
+export const adminUpsertCommuneRate = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ id: z.string().uuid().optional() }).merge(CommuneRateSchema).parse(input)
+  )
+  .handler(async ({ context, data }) => {
+    await assertAdmin({ supabase: context.supabase, userId: context.userId });
+    const payload = {
+      wilaya_code: data.wilaya_code,
+      commune: data.commune,
+      delivery_home_dzd: data.delivery_home_dzd,
+      delivery_office_dzd: data.delivery_office_dzd,
+    };
+    if (data.id) {
+      const { data: row, error } = await context.supabase
+        .from("commune_delivery_rates").update(payload).eq("id", data.id).select().single();
+      if (error) throw new Error(error.message);
+      return row;
+    }
+    const { data: row, error } = await context.supabase
+      .from("commune_delivery_rates")
+      .upsert(payload, { onConflict: "wilaya_code,commune" })
+      .select().single();
+    if (error) throw new Error(error.message);
+    return row;
+  });
+
+export const adminDeleteCommuneRate = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .handler(async ({ context, data }) => {
+    await assertAdmin({ supabase: context.supabase, userId: context.userId });
+    const { error } = await context.supabase.from("commune_delivery_rates").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

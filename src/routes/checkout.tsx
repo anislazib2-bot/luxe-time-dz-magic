@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useSuspenseQuery, useMutation } from "@tanstack/react-query";
+import { useSuspenseQuery, useMutation, useQuery } from "@tanstack/react-query";
 import { useState, useMemo } from "react";
-import { listWilayas } from "@/lib/catalog.functions";
+import { listWilayas, listCommuneRates } from "@/lib/catalog.functions";
 import { placeOrder } from "@/lib/orders.functions";
 import { useCart } from "@/lib/cart-store";
 import { formatDZD, isValidDZPhone } from "@/lib/format";
@@ -48,10 +48,22 @@ function CheckoutPage() {
 
   const subtotal = subtotalFn();
   const selectedWilaya = wilayas.data.find((w) => w.code === Number(form.wilaya_code));
+  const communeRates = useQuery({
+    queryKey: ["commune-rates", form.wilaya_code],
+    queryFn: () => listCommuneRates({ data: { wilaya_code: Number(form.wilaya_code) } } as any),
+    enabled: !!form.wilaya_code,
+  });
+  const communeMatch = useMemo(() => {
+    if (!form.commune.trim() || !communeRates.data) return null;
+    const target = form.commune.trim().toLowerCase();
+    return communeRates.data.find((c: any) => c.commune.toLowerCase() === target) ?? null;
+  }, [form.commune, communeRates.data]);
+  const homeFee = communeMatch?.delivery_home_dzd ?? selectedWilaya?.delivery_home_dzd ?? 0;
+  const officeFee = communeMatch?.delivery_office_dzd ?? selectedWilaya?.delivery_office_dzd ?? 0;
   const deliveryFee = useMemo(() => {
     if (!selectedWilaya) return 0;
-    return form.delivery_type === "home" ? selectedWilaya.delivery_home_dzd : selectedWilaya.delivery_office_dzd;
-  }, [selectedWilaya, form.delivery_type]);
+    return form.delivery_type === "home" ? homeFee : officeFee;
+  }, [selectedWilaya, form.delivery_type, homeFee, officeFee]);
   const total = subtotal + deliveryFee;
 
   const mut = useMutation({
@@ -164,14 +176,14 @@ function CheckoutPage() {
                 <RadioGroupItem value="home" />
                 <div className="flex-1">
                   <p className="font-medium">توصيل للمنزل</p>
-                  <p className="text-xs text-muted-foreground">{selectedWilaya ? formatDZD(selectedWilaya.delivery_home_dzd) : "اختر الولاية"}</p>
+                  <p className="text-xs text-muted-foreground">{selectedWilaya ? formatDZD(homeFee) : "اختر الولاية"}</p>
                 </div>
               </label>
               <label className={`flex cursor-pointer items-start gap-3 rounded-md border p-3 ${form.delivery_type === "office" ? "border-gold" : "border-border"}`}>
                 <RadioGroupItem value="office" />
                 <div className="flex-1">
                   <p className="font-medium">استلام من المكتب</p>
-                  <p className="text-xs text-muted-foreground">{selectedWilaya ? formatDZD(selectedWilaya.delivery_office_dzd) : "اختر الولاية"}</p>
+                  <p className="text-xs text-muted-foreground">{selectedWilaya ? formatDZD(officeFee) : "اختر الولاية"}</p>
                 </div>
               </label>
             </RadioGroup>
