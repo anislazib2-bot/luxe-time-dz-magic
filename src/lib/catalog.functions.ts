@@ -83,6 +83,19 @@ export const listWilayas = createServerFn({ method: "GET" }).handler(async () =>
   return (data ?? []) as WilayaRow[];
 });
 
+export const listCommuneRates = createServerFn({ method: "GET" })
+  .inputValidator((input: unknown) => z.object({ wilaya_code: z.number().int().min(1).max(58) }).parse(input))
+  .handler(async ({ data }) => {
+    const supabase = pubClient();
+    const { data: rows, error } = await supabase
+      .from("commune_delivery_rates")
+      .select("id,wilaya_code,commune,delivery_home_dzd,delivery_office_dzd")
+      .eq("wilaya_code", data.wilaya_code)
+      .order("commune");
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
 export const listBrands = createServerFn({ method: "GET" }).handler(async () => {
   const supabase = pubClient();
   const { data, error } = await supabase.from("products").select("brand").eq("is_active", true);
