@@ -55,7 +55,21 @@ function OrdersPage() {
                     <SelectContent>{STATUSES.map((s) => <SelectItem key={s} value={s}>{LABEL[s]}</SelectItem>)}</SelectContent>
                   </Select>
                 </td>
-                <td className="p-3"><button onClick={() => setOpenId(o.id)} className="text-xs underline">تفاصيل</button></td>
+                <td className="p-3">
+                  <div className="flex items-center gap-2">
+                    {o.status === "pending" && (
+                      <>
+                        <Button size="sm" variant="default" className="h-8 gap-1 bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => update.mutate({ id: o.id, status: "confirmed" })} disabled={update.isPending}>
+                          <Check className="h-4 w-4" /> قبول
+                        </Button>
+                        <Button size="sm" variant="destructive" className="h-8 gap-1" onClick={() => { if (confirm("هل تريد رفض هذا الطلب؟")) update.mutate({ id: o.id, status: "cancelled" }); }} disabled={update.isPending}>
+                          <X className="h-4 w-4" /> رفض
+                        </Button>
+                      </>
+                    )}
+                    <button onClick={() => setOpenId(o.id)} className="text-xs underline">تفاصيل</button>
+                  </div>
+                </td>
               </tr>
             ))}
             {orders.data && orders.data.length === 0 && <tr><td colSpan={6} className="p-6 text-center text-muted-foreground">لا توجد طلبات</td></tr>}
