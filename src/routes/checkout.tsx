@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useSuspenseQuery, useMutation } from "@tanstack/react-query";
+import { useSuspenseQuery, useMutation, useQuery } from "@tanstack/react-query";
 import { useState, useMemo } from "react";
-import { listWilayas } from "@/lib/catalog.functions";
+import { listWilayas, listCommuneRates } from "@/lib/catalog.functions";
 import { placeOrder } from "@/lib/orders.functions";
 import { useCart } from "@/lib/cart-store";
 import { formatDZD, isValidDZPhone } from "@/lib/format";
