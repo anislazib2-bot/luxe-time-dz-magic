@@ -176,7 +176,7 @@ function CheckoutPage() {
                 <RadioGroupItem value="home" />
                 <div className="flex-1">
                   <p className="font-medium">توصيل للمنزل</p>
-                  <p className="text-xs text-muted-foreground">{selectedWilaya ? formatDZD(selectedWilaya.delivery_home_dzd) : "اختر الولاية"}</p>
+                  <p className="text-xs text-muted-foreground">{selectedWilaya ? formatDZD(homeFee) : "اختر الولاية"}</p>
                 </div>
               </label>
               <label className={`flex cursor-pointer items-start gap-3 rounded-md border p-3 ${form.delivery_type === "office" ? "border-gold" : "border-border"}`}>
