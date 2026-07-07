@@ -62,14 +62,29 @@ export const placeOrder = createServerFn({ method: "POST" })
       };
     });
 
-    // Delivery price
-    const { data: w, error: wErr } = await supabase
-      .from("wilayas")
+    // Delivery price: prefer commune-level override, fallback to wilaya
+    const { data: cr } = await supabase
+      .from("commune_delivery_rates")
       .select("delivery_home_dzd,delivery_office_dzd")
-      .eq("code", data.wilaya_code)
+      .eq("wilaya_code", data.wilaya_code)
+      .ilike("commune", data.commune.trim())
       .maybeSingle();
-    if (wErr || !w) throw new Error("ولاية غير صحيحة");
-    const delivery = data.delivery_type === "home" ? w.delivery_home_dzd : w.delivery_office_dzd;
+    let deliveryHome: number;
+    let deliveryOffice: number;
+    if (cr) {
+      deliveryHome = cr.delivery_home_dzd;
+      deliveryOffice = cr.delivery_office_dzd;
+    } else {
+      const { data: w, error: wErr } = await supabase
+        .from("wilayas")
+        .select("delivery_home_dzd,delivery_office_dzd")
+        .eq("code", data.wilaya_code)
+        .maybeSingle();
+      if (wErr || !w) throw new Error("ولاية غير صحيحة");
+      deliveryHome = w.delivery_home_dzd;
+      deliveryOffice = w.delivery_office_dzd;
+    }
+    const delivery = data.delivery_type === "home" ? deliveryHome : deliveryOffice;
     const total = subtotal + delivery;
 
     // Insert order — RLS allows anyone to insert
