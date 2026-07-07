@@ -183,7 +183,7 @@ function CheckoutPage() {
                 <RadioGroupItem value="office" />
                 <div className="flex-1">
                   <p className="font-medium">استلام من المكتب</p>
-                  <p className="text-xs text-muted-foreground">{selectedWilaya ? formatDZD(selectedWilaya.delivery_office_dzd) : "اختر الولاية"}</p>
+                  <p className="text-xs text-muted-foreground">{selectedWilaya ? formatDZD(officeFee) : "اختر الولاية"}</p>
                 </div>
               </label>
             </RadioGroup>
