@@ -44,6 +44,44 @@ export type Database = {
         }
         Relationships: []
       }
+      commune_delivery_rates: {
+        Row: {
+          commune: string
+          created_at: string
+          delivery_home_dzd: number
+          delivery_office_dzd: number
+          id: string
+          updated_at: string
+          wilaya_code: number
+        }
+        Insert: {
+          commune: string
+          created_at?: string
+          delivery_home_dzd: number
+          delivery_office_dzd: number
+          id?: string
+          updated_at?: string
+          wilaya_code: number
+        }
+        Update: {
+          commune?: string
+          created_at?: string
+          delivery_home_dzd?: number
+          delivery_office_dzd?: number
+          id?: string
+          updated_at?: string
+          wilaya_code?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commune_delivery_rates_wilaya_code_fkey"
+            columns: ["wilaya_code"]
+            isOneToOne: false
+            referencedRelation: "wilayas"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           created_at: string
