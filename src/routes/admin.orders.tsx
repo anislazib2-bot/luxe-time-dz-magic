@@ -56,7 +56,7 @@ function OrdersPage() {
                   </Select>
                 </td>
                 <td className="p-3">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2 whitespace-nowrap">
                     {o.status === "pending" && (
                       <>
                         <Button size="sm" variant="default" className="h-8 gap-1 bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => update.mutate({ id: o.id, status: "confirmed" })} disabled={update.isPending}>
