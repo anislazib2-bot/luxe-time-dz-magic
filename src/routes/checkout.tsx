@@ -231,12 +231,36 @@ function CheckoutPage() {
             <Label>ملاحظات (اختياري)</Label>
             <Textarea rows={2} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
           </div>
+          <div>
+            <Label>صورة الساعة التي تريدها (اختياري)</Label>
+            <p className="mb-2 text-xs text-muted-foreground">ارفع صورة الساعة أو التصميم الذي تفضّله وسيتم تسليمه مع طلبك.</p>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => handlePickFile(e.target.files?.[0] ?? null)}
+            />
+            {!customImage ? (
+              <Button type="button" variant="outline" className="w-full gap-2" onClick={() => fileInputRef.current?.click()}>
+                <Upload className="h-4 w-4" /> اختر صورة
+              </Button>
+            ) : (
+              <div className="flex items-center gap-3 rounded-md border border-border p-2">
+                <img src={customImage.preview} alt="صورة الساعة المطلوبة" className="h-16 w-16 rounded object-cover" />
+                <div className="flex-1 text-xs text-muted-foreground truncate">{customImage.file.name}</div>
+                <Button type="button" size="icon" variant="ghost" onClick={() => { URL.revokeObjectURL(customImage.preview); setCustomImage(null); }}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
           <div className="rounded-md border border-gold/30 bg-gold/5 p-4">
             <p className="text-sm font-semibold">💵 الدفع عند الاستلام</p>
             <p className="mt-1 text-xs text-muted-foreground">ستدفع المبلغ كاملاً عند استلام طلبك.</p>
           </div>
-          <Button type="submit" size="lg" className="w-full gold-gradient text-ink font-semibold" disabled={mut.isPending}>
-            {mut.isPending ? "جاري الإرسال..." : `تأكيد الطلب (${formatDZD(total)})`}
+          <Button type="submit" size="lg" className="w-full gold-gradient text-ink font-semibold" disabled={mut.isPending || uploadingImage}>
+            {uploadingImage ? "جاري رفع الصورة..." : mut.isPending ? "جاري الإرسال..." : `تأكيد الطلب (${formatDZD(total)})`}
           </Button>
         </form>
 
