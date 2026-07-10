@@ -21,6 +21,7 @@ const PlaceOrderSchema = z.object({
   address: z.string().trim().max(300).optional().nullable(),
   delivery_type: z.enum(["home", "office"]),
   notes: z.string().trim().max(500).optional().nullable(),
+  custom_image_url: z.string().url().max(1000).optional().nullable(),
   items: z
     .array(z.object({ product_id: z.string().uuid(), quantity: z.number().int().min(1).max(10) }))
     .min(1)
