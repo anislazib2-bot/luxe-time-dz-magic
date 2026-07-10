@@ -1,10 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery, useMutation, useQuery } from "@tanstack/react-query";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { listWilayas, listCommuneRates } from "@/lib/catalog.functions";
 import { placeOrder } from "@/lib/orders.functions";
 import { useCart } from "@/lib/cart-store";
 import { formatDZD, isValidDZPhone } from "@/lib/format";
+import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { CheckCircle2, ShoppingBag } from "lucide-react";
+import { CheckCircle2, ShoppingBag, Upload, X } from "lucide-react";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [
