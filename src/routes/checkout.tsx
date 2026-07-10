@@ -70,8 +70,28 @@ function CheckoutPage() {
   }, [selectedWilaya, form.delivery_type, homeFee, officeFee]);
   const total = subtotal + deliveryFee;
 
+  async function uploadCustomImage(): Promise<string | null> {
+    if (!customImage) return null;
+    setUploadingImage(true);
+    try {
+      const ext = customImage.file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const path = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${ext}`;
+      const up = await supabase.storage.from("order-uploads").upload(path, customImage.file, {
+        contentType: customImage.file.type,
+        upsert: false,
+      });
+      if (up.error) throw new Error(up.error.message);
+      const signed = await supabase.storage.from("order-uploads").createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
+      if (signed.error || !signed.data) throw new Error(signed.error?.message ?? "فشل رفع الصورة");
+      return signed.data.signedUrl;
+    } finally {
+      setUploadingImage(false);
+    }
+  }
+
   const mut = useMutation({
     mutationFn: async () => {
+      const imageUrl = await uploadCustomImage();
       const res = await placeOrder({
         data: {
           full_name: form.full_name.trim(),
@@ -81,6 +101,7 @@ function CheckoutPage() {
           address: form.address.trim() || null,
           delivery_type: form.delivery_type,
           notes: form.notes.trim() || null,
+          custom_image_url: imageUrl,
           items: items.map((i) => ({ product_id: i.product_id, quantity: i.quantity })),
         },
       } as any);
@@ -93,6 +114,13 @@ function CheckoutPage() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  function handlePickFile(f: File | null) {
+    if (!f) return;
+    if (!f.type.startsWith("image/")) { toast.error("الملف يجب أن يكون صورة"); return; }
+    if (f.size > 5 * 1024 * 1024) { toast.error("حجم الصورة يجب أن يكون أقل من 5 ميغا"); return; }
+    setCustomImage({ file: f, preview: URL.createObjectURL(f) });
+  }
 
   if (done) {
     return (
