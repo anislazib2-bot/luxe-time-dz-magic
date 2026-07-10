@@ -77,13 +77,53 @@ function WilayaSection() {
     save.mutate({ code, delivery_home_dzd: home, delivery_office_dzd: office });
   }
 
+  const changedCodes = useMemo(() => {
+    if (!wilayas.data) return [] as number[];
+    return wilayas.data
+      .filter((w: any) => {
+        const e = edits[w.code];
+        if (!e) return false;
+        return Number(e.home) !== w.delivery_home_dzd || Number(e.office) !== w.delivery_office_dzd;
+      })
+      .map((w: any) => w.code as number);
+  }, [wilayas.data, edits]);
+
+  async function handleSaveAll() {
+    if (!changedCodes.length) { toast.info("لا توجد تغييرات للحفظ"); return; }
+    for (const code of changedCodes) {
+      const e = edits[code];
+      const home = Number(e.home);
+      const office = Number(e.office);
+      if (validatePrice(home) || validatePrice(office)) {
+        toast.error(`قيم غير صالحة للولاية ${code}`);
+        return;
+      }
+    }
+    try {
+      for (const code of changedCodes) {
+        const e = edits[code];
+        await adminUpdateWilaya({ data: { code, delivery_home_dzd: Number(e.home), delivery_office_dzd: Number(e.office) } as any } as any);
+      }
+      toast.success(`تم حفظ ${changedCodes.length} تغيير`);
+      qc.invalidateQueries({ queryKey: ["admin-wilayas"] });
+      qc.invalidateQueries({ queryKey: ["wilayas"] });
+    } catch (err: any) {
+      toast.error(err?.message ?? "فشل الحفظ");
+    }
+  }
+
   if (!wilayas.data) return <p>جاري التحميل...</p>;
 
   return (
     <section className="space-y-3">
-      <div>
-        <h1 className="font-display text-2xl font-bold">أسعار التوصيل حسب الولاية</h1>
-        <p className="text-sm text-muted-foreground">السعر الافتراضي المطبَّق على جميع بلديات الولاية.</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="font-display text-2xl font-bold">أسعار التوصيل حسب الولاية</h1>
+          <p className="text-sm text-muted-foreground">السعر الافتراضي المطبَّق على جميع بلديات الولاية.</p>
+        </div>
+        <Button onClick={handleSaveAll} disabled={save.isPending || changedCodes.length === 0} className="gap-2">
+          حفظ الكل {changedCodes.length > 0 && `(${changedCodes.length})`}
+        </Button>
       </div>
       <div className="overflow-hidden rounded-lg border border-border bg-card">
         <table className="w-full text-sm">
