@@ -38,7 +38,7 @@ function OrdersPage() {
         </Select>
       </div>
       <div className="overflow-x-auto rounded-lg border border-border bg-card">
-        <table className="w-full text-sm">
+        <table className="w-full min-w-[720px] text-sm">
           <thead className="bg-secondary text-xs uppercase">
             <tr><th className="p-3 text-start">الرقم</th><th className="p-3 text-start">العميل</th><th className="p-3 text-start">الهاتف</th><th className="p-3 text-start">الإجمالي</th><th className="p-3 text-start">الحالة</th><th></th></tr>
           </thead>
