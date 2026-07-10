@@ -46,6 +46,9 @@ function CheckoutPage() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [done, setDone] = useState<{ order_number: string; total_dzd: number } | null>(null);
+  const [customImage, setCustomImage] = useState<{ file: File; preview: string } | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const subtotal = subtotalFn();
   const selectedWilaya = wilayas.data.find((w) => w.code === Number(form.wilaya_code));
