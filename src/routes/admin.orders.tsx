@@ -67,7 +67,7 @@ function OrdersPage() {
                         </Button>
                       </>
                     )}
-                    <button onClick={() => setOpenId(o.id)} className="text-xs underline">تفاصيل</button>
+                    <Button size="sm" variant="outline" className="h-8" onClick={() => setOpenId(o.id)}>مراجعة</Button>
                   </div>
                 </td>
               </tr>
