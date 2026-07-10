@@ -37,8 +37,8 @@ function OrdersPage() {
           </SelectContent>
         </Select>
       </div>
-      <div className="overflow-hidden rounded-lg border border-border bg-card">
-        <table className="w-full text-sm">
+      <div className="overflow-x-auto rounded-lg border border-border bg-card">
+        <table className="w-full min-w-[720px] text-sm">
           <thead className="bg-secondary text-xs uppercase">
             <tr><th className="p-3 text-start">الرقم</th><th className="p-3 text-start">العميل</th><th className="p-3 text-start">الهاتف</th><th className="p-3 text-start">الإجمالي</th><th className="p-3 text-start">الحالة</th><th></th></tr>
           </thead>
@@ -56,7 +56,7 @@ function OrdersPage() {
                   </Select>
                 </td>
                 <td className="p-3">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2 whitespace-nowrap">
                     {o.status === "pending" && (
                       <>
                         <Button size="sm" variant="default" className="h-8 gap-1 bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => update.mutate({ id: o.id, status: "confirmed" })} disabled={update.isPending}>
@@ -83,9 +83,20 @@ function OrdersPage() {
 
 function OrderDialog({ id, onClose }: { id: string; onClose: () => void }) {
   const { data } = useQuery({ queryKey: ["admin-order", id], queryFn: () => adminGetOrder({ data: { id } } as any) });
+  const qc = useQueryClient();
+  const update = useMutation({
+    mutationFn: (v: { id: string; status: string }) => adminUpdateOrderStatus({ data: v as any } as any),
+    onSuccess: () => {
+      toast.success("تم التحديث");
+      qc.invalidateQueries({ queryKey: ["admin-orders"] });
+      qc.invalidateQueries({ queryKey: ["admin-order", id] });
+      qc.invalidateQueries({ queryKey: ["admin-stats"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>تفاصيل الطلب {data?.order?.order_number}</DialogTitle></DialogHeader>
         {data && data.order && (
           <div className="space-y-3 text-sm">
@@ -97,6 +108,15 @@ function OrderDialog({ id, onClose }: { id: string; onClose: () => void }) {
               {data.order.address && <div className="col-span-2"><p className="text-muted-foreground">العنوان</p><p>{data.order.address}</p></div>}
               {data.order.notes && <div className="col-span-2"><p className="text-muted-foreground">ملاحظات</p><p>{data.order.notes}</p></div>}
             </div>
+            {data.order.custom_image_url && (
+              <div className="border-t border-border pt-3">
+                <p className="mb-2 font-semibold">🖼️ صورة الساعة المطلوبة من العميل</p>
+                <a href={data.order.custom_image_url} target="_blank" rel="noopener noreferrer" className="block">
+                  <img src={data.order.custom_image_url} alt="صورة الساعة المطلوبة" className="max-h-64 rounded-md border border-border object-contain" />
+                </a>
+                <p className="mt-1 text-xs text-muted-foreground">اضغط على الصورة لعرضها بحجم كامل.</p>
+              </div>
+            )}
             <div className="border-t border-border pt-3">
               <h3 className="mb-2 font-semibold">المنتجات</h3>
               {data.items.map((it: any) => (
@@ -111,6 +131,16 @@ function OrderDialog({ id, onClose }: { id: string; onClose: () => void }) {
               <p>التوصيل: {formatDZD(data.order.delivery_dzd)}</p>
               <p className="text-base font-bold">الإجمالي: {formatDZD(data.order.total_dzd)}</p>
             </div>
+            {data.order.status === "pending" && (
+              <div className="flex gap-2 border-t border-border pt-3">
+                <Button className="flex-1 gap-1 bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => update.mutate({ id, status: "confirmed" })} disabled={update.isPending}>
+                  <Check className="h-4 w-4" /> قبول الطلب
+                </Button>
+                <Button variant="destructive" className="flex-1 gap-1" onClick={() => { if (confirm("هل تريد رفض هذا الطلب؟")) update.mutate({ id, status: "cancelled" }); }} disabled={update.isPending}>
+                  <X className="h-4 w-4" /> رفض
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </DialogContent>

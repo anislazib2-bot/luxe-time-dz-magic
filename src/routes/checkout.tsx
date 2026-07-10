@@ -1,10 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery, useMutation, useQuery } from "@tanstack/react-query";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { listWilayas, listCommuneRates } from "@/lib/catalog.functions";
 import { placeOrder } from "@/lib/orders.functions";
 import { useCart } from "@/lib/cart-store";
 import { formatDZD, isValidDZPhone } from "@/lib/format";
+import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { CheckCircle2, ShoppingBag } from "lucide-react";
+import { CheckCircle2, ShoppingBag, Upload, X } from "lucide-react";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [
@@ -45,6 +46,9 @@ function CheckoutPage() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [done, setDone] = useState<{ order_number: string; total_dzd: number } | null>(null);
+  const [customImage, setCustomImage] = useState<{ file: File; preview: string } | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const subtotal = subtotalFn();
   const selectedWilaya = wilayas.data.find((w) => w.code === Number(form.wilaya_code));
@@ -66,8 +70,28 @@ function CheckoutPage() {
   }, [selectedWilaya, form.delivery_type, homeFee, officeFee]);
   const total = subtotal + deliveryFee;
 
+  async function uploadCustomImage(): Promise<string | null> {
+    if (!customImage) return null;
+    setUploadingImage(true);
+    try {
+      const ext = customImage.file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const path = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${ext}`;
+      const up = await supabase.storage.from("order-uploads").upload(path, customImage.file, {
+        contentType: customImage.file.type,
+        upsert: false,
+      });
+      if (up.error) throw new Error(up.error.message);
+      const signed = await supabase.storage.from("order-uploads").createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
+      if (signed.error || !signed.data) throw new Error(signed.error?.message ?? "فشل رفع الصورة");
+      return signed.data.signedUrl;
+    } finally {
+      setUploadingImage(false);
+    }
+  }
+
   const mut = useMutation({
     mutationFn: async () => {
+      const imageUrl = await uploadCustomImage();
       const res = await placeOrder({
         data: {
           full_name: form.full_name.trim(),
@@ -77,6 +101,7 @@ function CheckoutPage() {
           address: form.address.trim() || null,
           delivery_type: form.delivery_type,
           notes: form.notes.trim() || null,
+          custom_image_url: imageUrl,
           items: items.map((i) => ({ product_id: i.product_id, quantity: i.quantity })),
         },
       } as any);
@@ -89,6 +114,13 @@ function CheckoutPage() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  function handlePickFile(f: File | null) {
+    if (!f) return;
+    if (!f.type.startsWith("image/")) { toast.error("الملف يجب أن يكون صورة"); return; }
+    if (f.size > 5 * 1024 * 1024) { toast.error("حجم الصورة يجب أن يكون أقل من 5 ميغا"); return; }
+    setCustomImage({ file: f, preview: URL.createObjectURL(f) });
+  }
 
   if (done) {
     return (
@@ -199,12 +231,36 @@ function CheckoutPage() {
             <Label>ملاحظات (اختياري)</Label>
             <Textarea rows={2} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
           </div>
+          <div>
+            <Label>صورة الساعة التي تريدها (اختياري)</Label>
+            <p className="mb-2 text-xs text-muted-foreground">ارفع صورة الساعة أو التصميم الذي تفضّله وسيتم تسليمه مع طلبك.</p>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => handlePickFile(e.target.files?.[0] ?? null)}
+            />
+            {!customImage ? (
+              <Button type="button" variant="outline" className="w-full gap-2" onClick={() => fileInputRef.current?.click()}>
+                <Upload className="h-4 w-4" /> اختر صورة
+              </Button>
+            ) : (
+              <div className="flex items-center gap-3 rounded-md border border-border p-2">
+                <img src={customImage.preview} alt="صورة الساعة المطلوبة" className="h-16 w-16 rounded object-cover" />
+                <div className="flex-1 text-xs text-muted-foreground truncate">{customImage.file.name}</div>
+                <Button type="button" size="icon" variant="ghost" onClick={() => { URL.revokeObjectURL(customImage.preview); setCustomImage(null); }}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
           <div className="rounded-md border border-gold/30 bg-gold/5 p-4">
             <p className="text-sm font-semibold">💵 الدفع عند الاستلام</p>
             <p className="mt-1 text-xs text-muted-foreground">ستدفع المبلغ كاملاً عند استلام طلبك.</p>
           </div>
-          <Button type="submit" size="lg" className="w-full gold-gradient text-ink font-semibold" disabled={mut.isPending}>
-            {mut.isPending ? "جاري الإرسال..." : `تأكيد الطلب (${formatDZD(total)})`}
+          <Button type="submit" size="lg" className="w-full gold-gradient text-ink font-semibold" disabled={mut.isPending || uploadingImage}>
+            {uploadingImage ? "جاري رفع الصورة..." : mut.isPending ? "جاري الإرسال..." : `تأكيد الطلب (${formatDZD(total)})`}
           </Button>
         </form>
 

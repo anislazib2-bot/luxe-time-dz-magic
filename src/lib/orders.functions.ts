@@ -21,6 +21,7 @@ const PlaceOrderSchema = z.object({
   address: z.string().trim().max(300).optional().nullable(),
   delivery_type: z.enum(["home", "office"]),
   notes: z.string().trim().max(500).optional().nullable(),
+  custom_image_url: z.string().url().max(1000).optional().nullable(),
   items: z
     .array(z.object({ product_id: z.string().uuid(), quantity: z.number().int().min(1).max(10) }))
     .min(1)
@@ -102,6 +103,7 @@ export const placeOrder = createServerFn({ method: "POST" })
         delivery_dzd: delivery,
         total_dzd: total,
         notes: data.notes ?? null,
+        custom_image_url: data.custom_image_url ?? null,
       })
       .select("id,order_number")
       .single();

@@ -135,6 +135,7 @@ export type Database = {
           address: string | null
           commune: string
           created_at: string
+          custom_image_url: string | null
           customer_user_id: string | null
           delivery_dzd: number
           delivery_type: Database["public"]["Enums"]["delivery_type"]
@@ -153,6 +154,7 @@ export type Database = {
           address?: string | null
           commune: string
           created_at?: string
+          custom_image_url?: string | null
           customer_user_id?: string | null
           delivery_dzd: number
           delivery_type?: Database["public"]["Enums"]["delivery_type"]
@@ -171,6 +173,7 @@ export type Database = {
           address?: string | null
           commune?: string
           created_at?: string
+          custom_image_url?: string | null
           customer_user_id?: string | null
           delivery_dzd?: number
           delivery_type?: Database["public"]["Enums"]["delivery_type"]
@@ -411,6 +414,7 @@ export type Database = {
           address: string
           commune: string
           created_at: string
+          custom_image_url: string
           delivery_dzd: number
           delivery_type: Database["public"]["Enums"]["delivery_type"]
           full_name: string

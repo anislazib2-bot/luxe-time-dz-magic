@@ -74,6 +74,14 @@ function TrackPage() {
                 <div><p className="text-muted-foreground">نوع التوصيل</p><p className="font-medium">{mut.data.order.delivery_type === "home" ? "للمنزل" : "من المكتب"}</p></div>
                 <div><p className="text-muted-foreground">الإجمالي</p><p className="font-bold">{formatDZD(mut.data.order.total_dzd)}</p></div>
               </div>
+              {(mut.data.order as any).custom_image_url && (
+                <div className="border-t border-border pt-4">
+                  <p className="mb-2 text-sm font-semibold">صورة الساعة التي طلبتها</p>
+                  <a href={(mut.data.order as any).custom_image_url} target="_blank" rel="noopener noreferrer" className="block">
+                    <img src={(mut.data.order as any).custom_image_url} alt="صورة الساعة المطلوبة" className="max-h-64 rounded-md border border-border object-contain" />
+                  </a>
+                </div>
+              )}
               <div className="border-t border-border pt-4">
                 <h3 className="mb-3 font-semibold">المنتجات</h3>
                 <div className="space-y-2">

@@ -125,8 +125,8 @@ function WilayaSection() {
           حفظ الكل {changedCodes.length > 0 && `(${changedCodes.length})`}
         </Button>
       </div>
-      <div className="overflow-hidden rounded-lg border border-border bg-card">
-        <table className="w-full text-sm">
+      <div className="overflow-x-auto rounded-lg border border-border bg-card">
+        <table className="w-full min-w-[600px] text-sm">
           <thead className="bg-secondary text-xs uppercase">
             <tr>
               <th className="p-3 text-start">الكود</th>
@@ -308,8 +308,8 @@ function CommuneSection() {
         </Select>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-border bg-card">
-        <table className="w-full text-sm">
+      <div className="overflow-x-auto rounded-lg border border-border bg-card">
+        <table className="w-full min-w-[600px] text-sm">
           <thead className="bg-secondary text-xs uppercase">
             <tr>
               <th className="p-3 text-start">الولاية</th>
