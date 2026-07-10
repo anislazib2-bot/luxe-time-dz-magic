@@ -103,6 +103,7 @@ export const placeOrder = createServerFn({ method: "POST" })
         delivery_dzd: delivery,
         total_dzd: total,
         notes: data.notes ?? null,
+        custom_image_url: data.custom_image_url ?? null,
       })
       .select("id,order_number")
       .single();
