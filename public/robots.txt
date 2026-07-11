@@ -7,4 +7,4 @@ Disallow: /checkout
 Disallow: /auth
 Disallow: /api/
 
-Sitemap: https://luxe-time-dz-magic.lovable.app/sitemap.xml
+Sitemap: https://luxe-time-dz-magic/sitemap.xml
